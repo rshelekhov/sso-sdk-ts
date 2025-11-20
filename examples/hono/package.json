@@ -1,0 +1,22 @@
+{
+  "name": "sso-sdk-hono-example",
+  "version": "1.0.0",
+  "description": "Example Hono app using SSO SDK",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.2.0",
+    "@rshelekhov/sso-sdk": "file:../../",
+    "dotenv": "^16.3.1",
+    "hono": "^3.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.9",
+    "tsx": "^3.12.7",
+    "typescript": "^5.2.2"
+  }
+}
