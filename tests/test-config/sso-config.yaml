@@ -1,0 +1,89 @@
+# SSO Test Configuration
+# Configuration for integration testing
+
+# App settings
+App:
+  Env: "test"
+  ServiceName: "sso"
+  ServiceVersion: "1.0.0"
+  EnableMetrics: false
+  EnableTracing: false
+
+# gRPC Server settings
+GRPCServer:
+  Host: "0.0.0.0"
+  Port: "44044"
+  Timeout: "30s"
+  RetriesCount: 3
+
+# HTTP Server settings (REST API via grpc-gateway)
+HTTPServer:
+  Host: "0.0.0.0"
+  Port: "8080"
+  Timeout: "30s"
+
+# Storage configuration
+Storage:
+  Type: "postgres"
+  Postgres:
+    ConnURL: "postgres://sso_user:sso_password@postgres:5432/sso_db?sslmode=disable"
+    ConnPoolSize: 10
+    ReadTimeout: "5s"
+    WriteTimeout: "5s"
+    IdleTimeout: "60s"
+    DialTimeout: "10s"
+
+# Redis Cache settings
+Cache:
+  Redis:
+    Host: "redis"
+    Port: 6379
+    Password: ""
+    DB: 0
+    PoolSize: 10
+    MinIdleConns: 5
+    SessionTTL: "24h"
+    RevokedTokenTTL: "24h"
+
+# JWT configuration
+JWT:
+  Issuer: "sso-service"
+  SigningMethod: "RS256"
+  JWKSTTL: "24h"
+  AccessTokenTTL: "15m"
+  RefreshTokenTTL: "720h"
+  RefreshTokenCookieDomain: ""
+  RefreshTokenCookiePath: "/"
+
+# Password hashing configuration
+PasswordHash:
+  Type: "argon2"
+  SaltLength: 24
+  Pepper: "test-pepper-for-integration-tests"
+  Argon:
+    Time: 1  # Faster for tests
+    Memory: 12288  # Less memory for tests
+    Parallelism: 1  # Simpler for tests
+    KeyLength: 24
+
+# Key storage configuration
+KeyStorage:
+  Type: "s3"  # Use MinIO (S3-compatible) with test keys
+  S3:
+    Region: "us-east-1"
+    Bucket: "sso"
+    AccessKey: "minio_user"
+    SecretKey: "minio_password"
+    PrivateKeyPath: "keys/"
+    Endpoint: "minio:9000"
+    ForcePathStyle: true
+    DisableSSL: true
+
+# Mail service configuration
+MailService:
+  Type: "mock"
+  TemplatesPath: "/src/static/email_templates"
+
+# Verification service configuration
+VerificationService:
+  TokenExpiryTime: "24h"
