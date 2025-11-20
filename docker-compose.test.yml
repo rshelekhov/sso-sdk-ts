@@ -1,0 +1,116 @@
+# Docker Compose for SDK Integration Tests
+# This setup runs the SSO server and required dependencies for testing
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sso_db
+      POSTGRES_USER: sso_user
+      POSTGRES_PASSWORD: sso_password
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+    ports:
+      - "15432:5432"  # Use non-conflicting port
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sso_user -d sso_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "16379:6379"  # Use non-conflicting port
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MinIO (S3-compatible storage for JWT keys)
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minio_user
+      MINIO_ROOT_PASSWORD: minio_password
+    ports:
+      - "19000:9000"  # Use non-conflicting port
+      - "19001:9001"  # Use non-conflicting port
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - minio_test_data:/data
+
+  # MinIO initialization - creates bucket and uploads test keys
+  # Uses SSO image which contains test keys in /src/certs
+  minio-init:
+    image: rshelekhov/grpc-sso:v0.3.2
+    depends_on:
+      minio:
+        condition: service_healthy
+    command: >
+      sh -c "
+        apk add --no-cache curl &&
+        wget -O /usr/local/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc &&
+        chmod +x /usr/local/bin/mc &&
+        echo 'Configuring MinIO client...' &&
+        mc alias set local http://minio:9000 minio_user minio_password &&
+        echo 'Creating SSO bucket...' &&
+        mc mb local/sso --ignore-existing &&
+        echo 'Setting bucket policy...' &&
+        mc anonymous set none local/sso &&
+        echo 'Uploading test keys...' &&
+        if [ -f /src/certs/app_test-client-id_private.pem ]; then
+          mc cp /src/certs/app_test-client-id_private.pem local/sso/keys/app_test-client-id_private.pem &&
+          echo 'Test key uploaded successfully!';
+        else
+          echo 'Warning: No test key found in /src/certs';
+        fi &&
+        echo 'MinIO initialization complete!'
+      "
+    restart: "no"
+
+  # SSO Server - uses test-entrypoint.sh from image
+  sso:
+    image: rshelekhov/grpc-sso:v0.3.2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    environment:
+      CONFIG_PATH: /app/config.yaml
+      RUN_TESTS: "false"  # Setup DB and start server, don't run Go tests
+    volumes:
+      - ./tests/test-config/sso-config.yaml:/app/config.yaml
+    ports:
+      - "8080:8080"   # HTTP/REST API
+      - "44044:44044" # gRPC
+    command: /usr/local/bin/test-entrypoint.sh
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "44044"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  postgres_test_data:
+  minio_test_data:
