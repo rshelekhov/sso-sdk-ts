@@ -1,10 +1,11 @@
 /**
  * Helper functions for integration tests
  */
-
 import { faker } from '@faker-js/faker';
-import { SSOClient, Platform, DeviceContext, TokenData } from '../../src';
+
 import { testConfig } from './config';
+
+import { DeviceContext, Platform, SSOClient, TokenData } from '../../src';
 
 /**
  * Generate random test user data
@@ -60,20 +61,14 @@ export function createTestClient(): SSOClient {
 /**
  * Wait for SSO server to be ready
  */
-export async function waitForServer(
-  maxAttempts = 30,
-  delayMs = 1000
-): Promise<boolean> {
+export async function waitForServer(maxAttempts = 30, delayMs = 1000): Promise<boolean> {
   for (let i = 0; i < maxAttempts; i++) {
     try {
-      const response = await fetch(
-        `${testConfig.ssoBaseUrl}/v1/auth/.well-known/jwks.json`,
-        {
-          headers: {
-            'X-Client-Id': testConfig.clientId,
-          },
-        }
-      );
+      const response = await fetch(`${testConfig.ssoBaseUrl}/v1/auth/.well-known/jwks.json`, {
+        headers: {
+          'X-Client-Id': testConfig.clientId,
+        },
+      });
       if (response.ok) {
         console.log('SSO server is ready!');
         return true;

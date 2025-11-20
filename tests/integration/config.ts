@@ -14,10 +14,8 @@ export const testConfig = {
   issuer: process.env.TEST_ISSUER || 'sso-service',
 
   // Public URLs for email verification and password reset
-  verificationUrl:
-    process.env.TEST_VERIFICATION_URL || 'http://localhost:3000/verify-email',
-  passwordResetUrl:
-    process.env.TEST_PASSWORD_RESET_URL || 'http://localhost:3000/reset-password',
+  verificationUrl: process.env.TEST_VERIFICATION_URL || 'http://localhost:3000/verify-email',
+  passwordResetUrl: process.env.TEST_PASSWORD_RESET_URL || 'http://localhost:3000/reset-password',
 
   // Test timeouts
   defaultTimeout: 30000, // 30 seconds

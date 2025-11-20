@@ -1,8 +1,8 @@
 /**
  * Unit tests for token utilities
  */
+import { describe, expect, test } from 'bun:test';
 
-import { describe, test, expect } from 'bun:test';
 import { SSOClient } from '../../src';
 
 describe('Token Utilities', () => {

@@ -2,19 +2,20 @@
  * Integration tests for authentication flow
  * Requires SSO server to be running (use docker-compose.test.yml)
  */
+import { afterEach, beforeAll, describe, expect, test } from 'bun:test';
 
-import { describe, test, expect, beforeAll, afterEach } from 'bun:test';
-import { TokenData } from '../../src';
+import { testConfig } from './config';
 import {
-  createTestClient,
-  generateTestUser,
-  generateDeviceContext,
   cleanupTestUser,
-  waitForServer,
+  createTestClient,
+  generateDeviceContext,
+  generateTestUser,
   parseJWT,
   sleep,
+  waitForServer,
 } from './helpers';
-import { testConfig } from './config';
+
+import { TokenData } from '../../src';
 
 describe('Authentication Flow - Integration', () => {
   let tokensToCleanup: { tokens: TokenData; deviceContext: any }[] = [];
@@ -67,11 +68,7 @@ describe('Authentication Flow - Integration', () => {
       tokensToCleanup.push({ tokens, deviceContext });
 
       // 2. Login with same credentials
-      const loginTokens = await client.login(
-        testUser.email,
-        testUser.password,
-        deviceContext
-      );
+      const loginTokens = await client.login(testUser.email, testUser.password, deviceContext);
 
       expect(loginTokens.accessToken).toBeDefined();
       expect(loginTokens.refreshToken).toBeDefined();
@@ -79,8 +76,10 @@ describe('Authentication Flow - Integration', () => {
       tokens = loginTokens;
 
       // 3. Get user profile with auto-refresh
-      const { data: profile, tokens: refreshedTokens } =
-        await client.getProfileWithRefresh(tokens, deviceContext);
+      const { data: profile, tokens: refreshedTokens } = await client.getProfileWithRefresh(
+        tokens,
+        deviceContext
+      );
 
       expect(profile.email).toBe(testUser.email.toLowerCase());
       expect(profile.name).toBe(testUser.name);
@@ -100,9 +99,7 @@ describe('Authentication Flow - Integration', () => {
       // 6. Verify session is invalidated - refresh should fail
       // Note: Access tokens (JWT) remain valid until expiry even after logout
       // But the refresh token session should be deleted
-      await expect(
-        client.refreshTokens(tokens.refreshToken, deviceContext)
-      ).rejects.toThrow();
+      await expect(client.refreshTokens(tokens.refreshToken, deviceContext)).rejects.toThrow();
     },
     testConfig.defaultTimeout
   );
@@ -140,10 +137,7 @@ describe('Authentication Flow - Integration', () => {
       tokensToCleanup.push({ tokens, deviceContext });
 
       // Manually refresh tokens
-      const newTokens = await client.refreshTokens(
-        tokens.refreshToken,
-        deviceContext
-      );
+      const newTokens = await client.refreshTokens(tokens.refreshToken, deviceContext);
 
       expect(newTokens.accessToken).toBeDefined();
       expect(newTokens.accessToken).toBeTruthy();
@@ -151,10 +145,7 @@ describe('Authentication Flow - Integration', () => {
       expect(newTokens.expiresAt).toBeDefined();
 
       // New tokens should work
-      const { data: profile } = await client.getProfileWithRefresh(
-        newTokens,
-        deviceContext
-      );
+      const { data: profile } = await client.getProfileWithRefresh(newTokens, deviceContext);
       expect(profile.email).toBe(testUser.email.toLowerCase());
 
       // Cleanup with new tokens
@@ -183,8 +174,10 @@ describe('Authentication Flow - Integration', () => {
 
       // Use WithRefresh method multiple times - should handle refresh automatically
       for (let i = 0; i < 3; i++) {
-        const { data: profile, tokens: newTokens } =
-          await client.getProfileWithRefresh(tokens, deviceContext);
+        const { data: profile, tokens: newTokens } = await client.getProfileWithRefresh(
+          tokens,
+          deviceContext
+        );
 
         expect(profile.email).toBe(testUser.email.toLowerCase());
         expect(newTokens.accessToken).toBeDefined();
@@ -256,21 +249,17 @@ describe('Authentication Flow - Integration', () => {
 
       // Update profile
       const newName = 'Updated Name';
-      const { data: updateResult, tokens: newTokens } =
-        await client.updateProfileWithRefresh(
-          tokens,
-          { name: newName },
-          deviceContext
-        );
+      const { data: updateResult, tokens: newTokens } = await client.updateProfileWithRefresh(
+        tokens,
+        { name: newName },
+        deviceContext
+      );
 
       expect(updateResult.name).toBe(newName);
       tokens = newTokens;
 
       // Verify update by getting profile again
-      const { data: profile } = await client.getProfileWithRefresh(
-        tokens,
-        deviceContext
-      );
+      const { data: profile } = await client.getProfileWithRefresh(tokens, deviceContext);
       expect(profile.name).toBe(newName);
 
       // Cleanup
