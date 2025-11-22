@@ -1,14 +1,14 @@
+import { randomBytes } from 'node:crypto';
 import { serve } from '@hono/node-server';
 import {
   AuthMiddleware,
+  type JWTClaims,
   Platform,
   SSOClient,
-  type JWTClaims,
   type TokenData,
 } from '@rshelekhov/sso-sdk';
-import { randomBytes } from 'crypto';
 import dotenv from 'dotenv';
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 
 dotenv.config();
@@ -54,29 +54,14 @@ app.use('*', async (c, next) => {
       maxAge: 24 * 60 * 60, // 24 hours
       path: '/',
     });
-    // Attach session id to context for later use if needed
     c.set('sessionId', newSessionId);
   }
 
-  // Restore tokens
-  if (session.tokens) {
-    ssoClient.setTokens(session.tokens);
-  }
-
   await next();
-
-  // Persist tokens (handle refresh)
-  const tokens = ssoClient.getTokens();
-  if (tokens) {
-    session.tokens = tokens;
-  } else if (session.tokens && !tokens) {
-    // Tokens were cleared (logout)
-    delete session.tokens;
-  }
 });
 
 // Helper to get device context
-const getDeviceContext = (c: any) => {
+const getDeviceContext = (c: Context) => {
   const userAgent = c.req.header('user-agent') || 'unknown';
   // Hono doesn't provide IP directly in all environments, mock for example
   const clientIP = '127.0.0.1';
@@ -97,13 +82,15 @@ app.post('/login', async (c) => {
 
     // Save to session
     const sessionId = c.get('sessionId');
-    if (sessionId && sessionStore.has(sessionId)) {
-      sessionStore.get(sessionId)!.tokens = tokens;
+    const session = sessionId ? sessionStore.get(sessionId) : undefined;
+    if (session) {
+      session.tokens = tokens;
     }
 
     return c.json({ message: 'Logged in successfully' });
-  } catch (error: any) {
-    return c.json({ error: error.message }, 401);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Login failed';
+    return c.json({ error: message }, 401);
   }
 });
 
@@ -112,36 +99,47 @@ app.post('/register', async (c) => {
     const { email, password, name } = await c.req.json();
     const result = await ssoClient.register(email, password, name, getDeviceContext(c));
     return c.json(result);
-  } catch (error: any) {
-    return c.json({ error: error.message }, 400);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Registration failed';
+    return c.json({ error: message }, 400);
   }
 });
 
 app.post('/logout', async (c) => {
   try {
-    await ssoClient.logout(getDeviceContext(c));
-
     const sessionId = c.get('sessionId');
+    const session = sessionId ? sessionStore.get(sessionId) : undefined;
+
+    if (session?.tokens) {
+      await ssoClient.logout(session.tokens.accessToken, getDeviceContext(c));
+    }
+
     if (sessionId) {
       sessionStore.delete(sessionId);
       deleteCookie(c, 'session_id');
     }
 
     return c.json({ message: 'Logged out successfully' });
-  } catch (error: any) {
-    return c.json({ error: error.message }, 500);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Logout failed';
+    return c.json({ error: message }, 500);
   }
 });
 
 app.get('/profile', async (c) => {
   try {
-    if (!ssoClient.isAuthenticated()) {
+    const sessionId = c.get('sessionId');
+    const session = sessionId ? sessionStore.get(sessionId) : undefined;
+
+    if (!session?.tokens) {
       return c.json({ error: 'Not authenticated' }, 401);
     }
-    const user = await ssoClient.getProfile(getDeviceContext(c));
+
+    const user = await ssoClient.getProfile(session.tokens.accessToken, getDeviceContext(c));
     return c.json(user);
-  } catch (error: any) {
-    return c.json({ error: error.message }, 401);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to get profile';
+    return c.json({ error: message }, 401);
   }
 });
 
