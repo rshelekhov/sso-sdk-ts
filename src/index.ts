@@ -4,9 +4,11 @@ import { UserAPI } from './api/user.js';
 import type { Platform, SSOClientConfig, TokenData, User } from './types/index.js';
 import { isTokenExpired } from './utils/index.js';
 
+export * from './errors/index.js';
 // Re-export types and errors for convenience
 export * from './types/index.js';
-export * from './errors/index.js';
+// Re-export middleware for authentication
+export * from './middleware/index.js';
 
 /**
  * Request parameters required for operations involving user device context

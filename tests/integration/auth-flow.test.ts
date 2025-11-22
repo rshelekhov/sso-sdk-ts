@@ -3,7 +3,7 @@
  * Requires SSO server to be running (use docker-compose.test.yml)
  */
 import { afterEach, beforeAll, describe, expect, test } from 'bun:test';
-
+import type { DeviceContext, TokenData } from '../../src';
 import { testConfig } from './config';
 import {
   cleanupTestUser,
@@ -11,14 +11,11 @@ import {
   generateDeviceContext,
   generateTestUser,
   parseJWT,
-  sleep,
   waitForServer,
 } from './helpers';
 
-import { TokenData } from '../../src';
-
 describe('Authentication Flow - Integration', () => {
-  let tokensToCleanup: { tokens: TokenData; deviceContext: any }[] = [];
+  let tokensToCleanup: { tokens: TokenData; deviceContext: DeviceContext }[] = [];
 
   // Wait for SSO server to be ready before running tests
   beforeAll(async () => {
@@ -59,7 +56,10 @@ describe('Authentication Flow - Integration', () => {
       expect(registerResult.userId.length).toBeGreaterThan(0);
       expect(registerResult.tokenData).toBeDefined();
 
-      let tokens = registerResult.tokenData!;
+      if (!registerResult.tokenData) {
+        throw new Error('Expected tokenData to be present after registration');
+      }
+      let tokens = registerResult.tokenData;
       expect(tokens.accessToken).toBeDefined();
       expect(tokens.refreshToken).toBeDefined();
       expect(tokens.expiresAt).toBeDefined();
@@ -95,6 +95,7 @@ describe('Authentication Flow - Integration', () => {
 
       // 5. Logout
       await client.logout(tokens.accessToken, deviceContext);
+      tokensToCleanup = []; // Clear cleanup since we already logged out
 
       // 6. Verify session is invalidated - refresh should fail
       // Note: Access tokens (JWT) remain valid until expiry even after logout
@@ -133,7 +134,10 @@ describe('Authentication Flow - Integration', () => {
         deviceContext
       );
 
-      let tokens = registerResult.tokenData!;
+      if (!registerResult.tokenData) {
+        throw new Error('Expected tokenData to be present after registration');
+      }
+      const tokens = registerResult.tokenData;
       tokensToCleanup.push({ tokens, deviceContext });
 
       // Manually refresh tokens
@@ -150,6 +154,7 @@ describe('Authentication Flow - Integration', () => {
 
       // Cleanup with new tokens
       await client.logout(newTokens.accessToken, deviceContext);
+      tokensToCleanup = []; // Clear cleanup since we already logged out
     },
     testConfig.defaultTimeout
   );
@@ -169,7 +174,10 @@ describe('Authentication Flow - Integration', () => {
         deviceContext
       );
 
-      let tokens = registerResult.tokenData!;
+      if (!registerResult.tokenData) {
+        throw new Error('Expected tokenData to be present after registration');
+      }
+      let tokens = registerResult.tokenData;
       tokensToCleanup.push({ tokens, deviceContext });
 
       // Use WithRefresh method multiple times - should handle refresh automatically
@@ -187,6 +195,7 @@ describe('Authentication Flow - Integration', () => {
 
       // Cleanup
       await client.logout(tokens.accessToken, deviceContext);
+      tokensToCleanup = []; // Clear cleanup since we already logged out
     },
     testConfig.defaultTimeout
   );
@@ -206,7 +215,10 @@ describe('Authentication Flow - Integration', () => {
         deviceContext
       );
 
-      const tokens = registerResult.tokenData!;
+      if (!registerResult.tokenData) {
+        throw new Error('Expected tokenData to be present after registration');
+      }
+      const tokens = registerResult.tokenData;
       tokensToCleanup.push({ tokens, deviceContext });
 
       // Make multiple concurrent requests
@@ -225,6 +237,7 @@ describe('Authentication Flow - Integration', () => {
 
       // Cleanup
       await client.logout(tokens.accessToken, deviceContext);
+      tokensToCleanup = []; // Clear cleanup since we already logged out
     },
     testConfig.defaultTimeout
   );
@@ -244,7 +257,10 @@ describe('Authentication Flow - Integration', () => {
         deviceContext
       );
 
-      let tokens = registerResult.tokenData!;
+      if (!registerResult.tokenData) {
+        throw new Error('Expected tokenData to be present after registration');
+      }
+      let tokens = registerResult.tokenData;
       tokensToCleanup.push({ tokens, deviceContext });
 
       // Update profile
@@ -264,6 +280,7 @@ describe('Authentication Flow - Integration', () => {
 
       // Cleanup
       await client.logout(tokens.accessToken, deviceContext);
+      tokensToCleanup = []; // Clear cleanup since we already logged out
     },
     testConfig.defaultTimeout
   );
