@@ -1,6 +1,5 @@
+import { parseAPIError, SSOError } from '../errors/index.js';
 import type { APIErrorResponse, SSOClientConfig } from '../types/index.js';
-
-import { SSOError, parseAPIError } from '../errors/index.js';
 
 /**
  * BaseAPIClient handles all HTTP communication with the SSO API

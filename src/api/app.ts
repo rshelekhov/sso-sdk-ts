@@ -2,11 +2,6 @@ import { BaseAPIClient } from './base.js';
 import { API_ROUTES } from './routes.js';
 
 /**
- * Response from registerClient endpoint
- */
-interface RegisterClientResponse {}
-
-/**
  * AppAPI handles client application management
  * Used for registering new client applications in the SSO system
  */
@@ -21,7 +16,7 @@ export class AppAPI extends BaseAPIClient {
    * await appAPI.registerClient('MyBackendService');
    */
   async registerClient(clientName: string): Promise<void> {
-    await this.post<RegisterClientResponse>(API_ROUTES.CLIENT.REGISTER, {
+    await this.post<Record<string, never>>(API_ROUTES.CLIENT.REGISTER, {
       client_name: clientName,
     });
   }

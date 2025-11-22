@@ -1,9 +1,7 @@
 import type { Platform, SSOClientConfig, TokenData } from '../types/index.js';
-
+import { createDeviceData, validatePublicUrl } from '../utils/index.js';
 import { BaseAPIClient } from './base.js';
 import { API_ROUTES } from './routes.js';
-
-import { createDeviceData, validatePublicUrl } from '../utils/index.js';
 
 /**
  * Response from register endpoint

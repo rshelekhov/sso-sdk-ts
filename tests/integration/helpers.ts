@@ -2,10 +2,8 @@
  * Helper functions for integration tests
  */
 import { faker } from '@faker-js/faker';
-
+import { type DeviceContext, Platform, SSOClient, type TokenData } from '../../src';
 import { testConfig } from './config';
-
-import { DeviceContext, Platform, SSOClient, TokenData } from '../../src';
 
 /**
  * Generate random test user data
