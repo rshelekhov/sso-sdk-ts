@@ -79,6 +79,28 @@ try {
 }
 ```
 
+## JWT Middleware
+
+For stateless authentication, the SDK provides JWT middleware that validates tokens using JWKS:
+
+```typescript
+import { AuthMiddleware } from '@sso-sdk/client';
+
+const authMiddleware = new AuthMiddleware({
+  jwksUrl: 'https://api.sso-service.com/v1/auth/.well-known/jwks.json',
+  issuer: 'sso-service',
+  audience: 'your-client-id',
+  clientId: 'your-client-id',
+});
+
+// Use with your framework
+app.use('/api/protected', authMiddleware.hono());  // Hono
+app.use('/api/protected', authMiddleware.express());  // Express
+fastify.addHook('preHandler', authMiddleware.fastify());  // Fastify
+```
+
+The middleware verifies JWT signatures, validates claims, and attaches user data to the request context. Perfect for microservices and stateless architectures.
+
 ## Token Storage
 
 The SDK manages tokens in-memory to give you full control over persistence. You are responsible for:
@@ -89,6 +111,7 @@ The SDK manages tokens in-memory to give you full control over persistence. You 
 
 ## Documentation
 
+*   [JWT Middleware Guide](src/middleware/MIDDLEWARE.md) - Stateless authentication with JWKS
 *   [Token Storage Patterns](docs/token-storage.md)
 *   [Testing Guide](tests/README.md) - How to run and write tests
 *   [Security Guide](docs/security.md) (Coming Soon)
@@ -96,10 +119,7 @@ The SDK manages tokens in-memory to give you full control over persistence. You 
 
 ## Examples
 
-*   [Express.js](examples/express) (Coming Soon)
-*   [Fastify](examples/fastify) (Coming Soon)
-*   [Hono](examples/hono) (Coming Soon)
-*   [NestJS](examples/nestjs) (Coming Soon)
+*   [Hono](examples/hono)
 
 ## Development
 
