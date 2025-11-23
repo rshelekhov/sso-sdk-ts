@@ -103,7 +103,7 @@ export function validatePublicUrl(url: string, fieldName: string): void {
           `Use a public domain instead.`
       );
     }
-  } catch (error) {
+  } catch (_error) {
     throw new Error(`${fieldName}: Invalid URL format "${url}"`);
   }
 }

@@ -82,5 +82,18 @@
       "bracketSpacing": true,
       "bracketSameLine": false
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["tests/**/*.ts", "examples/**/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noEmptyBlockStatements": "off"
+          }
+        }
+      }
+    }
+  ]
 }

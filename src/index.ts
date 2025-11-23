@@ -5,10 +5,10 @@ import type { Platform, SSOClientConfig, TokenData, User } from './types/index.j
 import { isTokenExpired } from './utils/index.js';
 
 export * from './errors/index.js';
-// Re-export types and errors for convenience
-export * from './types/index.js';
 // Re-export middleware for authentication
 export * from './middleware/index.js';
+// Re-export types and errors for convenience
+export * from './types/index.js';
 
 /**
  * Request parameters required for operations involving user device context
@@ -326,7 +326,7 @@ export class SSOClient {
    * );
    * ```
    */
-  async getProfile(accessToken: string, deviceContext: DeviceContext): Promise<User> {
+  async getProfile(accessToken: string, _deviceContext: DeviceContext): Promise<User> {
     return this.user.getUser(accessToken);
   }
 
@@ -341,7 +341,7 @@ export class SSOClient {
   async getProfileByID(
     accessToken: string,
     userId: string,
-    deviceContext: DeviceContext
+    _deviceContext: DeviceContext
   ): Promise<User> {
     return this.user.getUserByID(accessToken, userId);
   }
@@ -357,7 +357,7 @@ export class SSOClient {
   async updateProfile(
     accessToken: string,
     updates: UpdateUserRequest,
-    deviceContext: DeviceContext
+    _deviceContext: DeviceContext
   ): Promise<{ email: string; name: string; updatedAt: string }> {
     return this.user.updateUser(accessToken, updates);
   }
@@ -369,7 +369,7 @@ export class SSOClient {
    * @param deviceContext Device context
    * @returns Success status
    */
-  async deleteAccount(accessToken: string, deviceContext: DeviceContext): Promise<boolean> {
+  async deleteAccount(accessToken: string, _deviceContext: DeviceContext): Promise<boolean> {
     return this.user.deleteUser(accessToken);
   }
 
@@ -384,7 +384,7 @@ export class SSOClient {
   async deleteAccountByID(
     accessToken: string,
     userId: string,
-    deviceContext: DeviceContext
+    _deviceContext: DeviceContext
   ): Promise<boolean> {
     return this.user.deleteUserByID(accessToken, userId);
   }
@@ -402,7 +402,7 @@ export class SSOClient {
   async searchUsers(
     accessToken: string,
     query: string,
-    deviceContext: DeviceContext,
+    _deviceContext: DeviceContext,
     pageSize?: number,
     pageToken?: string
   ): Promise<{

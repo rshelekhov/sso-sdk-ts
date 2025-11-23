@@ -104,7 +104,7 @@ export class JWKSFetcher {
    */
   clearExpiredCache(): void {
     const now = Date.now();
-    for (const [url, entry] of this.cache.entries()) {
+    for (const [url, entry] of Array.from(this.cache.entries())) {
       if (now >= entry.expiresAt) {
         this.cache.delete(url);
       }

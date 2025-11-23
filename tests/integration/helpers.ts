@@ -28,7 +28,7 @@ export function generateSecurePassword(): string {
   });
 
   // Ensure it has all required character types
-  return password + 'Aa1!';
+  return `${password}Aa1!`;
 }
 
 /**
@@ -71,7 +71,7 @@ export async function waitForServer(maxAttempts = 30, delayMs = 1000): Promise<b
         console.log('SSO server is ready!');
         return true;
       }
-    } catch (error) {
+    } catch (_error) {
       // Server not ready yet
     }
 
@@ -138,7 +138,7 @@ export function isJWTExpired(token: string): boolean {
     }
 
     return Date.now() >= payload.exp * 1000;
-  } catch (error) {
+  } catch (_error) {
     return true;
   }
 }

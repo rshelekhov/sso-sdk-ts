@@ -1,4 +1,5 @@
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
+
 import type { AuthMiddlewareConfig, JWK, JWTClaims } from './types';
 import { AuthError, AuthErrorType } from './types';
 
@@ -52,7 +53,9 @@ export class JWTVerifier {
 
       return keys;
     } catch (error) {
-      if (error instanceof AuthError) throw error;
+      if (error instanceof AuthError) {
+        throw error;
+      }
       throw new AuthError(
         AuthErrorType.JWKS_FETCH_FAILED,
         `Failed to fetch JWKS: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -84,16 +87,16 @@ export class JWTVerifier {
         throw new AuthError(AuthErrorType.TOKEN_MALFORMED, 'Invalid JWT format');
       }
 
-      const [headerB64, payloadB64, signatureB64] = parts;
+      const [headerB64, payloadB64, signatureB64] = parts as [string, string, string];
 
       // Decode header
-      const header = JSON.parse(Buffer.from(headerB64!, 'base64url').toString());
+      const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString());
       if (header.alg !== 'RS256') {
         throw new AuthError(AuthErrorType.TOKEN_INVALID, `Unsupported algorithm: ${header.alg}`);
       }
 
       // Decode payload
-      const payload = JSON.parse(Buffer.from(payloadB64!, 'base64url').toString());
+      const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString());
 
       // Check expiration
       if (payload.exp && payload.exp < Date.now() / 1000) {
@@ -134,7 +137,7 @@ export class JWTVerifier {
       const verifier = crypto.createVerify('RSA-SHA256');
       verifier.update(`${headerB64}.${payloadB64}`);
 
-      const signature = Buffer.from(signatureB64!, 'base64url');
+      const signature = Buffer.from(signatureB64, 'base64url');
       if (!verifier.verify(key, signature)) {
         throw new AuthError(AuthErrorType.SIGNATURE_INVALID, 'Invalid token signature');
       }
@@ -142,7 +145,9 @@ export class JWTVerifier {
       // Build claims
       return this.payloadToClaims(payload);
     } catch (error) {
-      if (error instanceof AuthError) throw error;
+      if (error instanceof AuthError) {
+        throw error;
+      }
       throw new AuthError(
         AuthErrorType.TOKEN_INVALID,
         `Token validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -179,9 +184,13 @@ export class JWTVerifier {
    * Extract token from Authorization header
    */
   static extractFromHeader(authHeader: string | null | undefined): string | null {
-    if (!authHeader) return null;
+    if (!authHeader) {
+      return null;
+    }
     const parts = authHeader.split(' ');
-    if (parts.length !== 2 || parts[0]?.toLowerCase() !== 'bearer') return null;
+    if (parts.length !== 2 || parts[0]?.toLowerCase() !== 'bearer') {
+      return null;
+    }
     return parts[1] || null;
   }
 
@@ -189,7 +198,9 @@ export class JWTVerifier {
    * Extract token from cookie
    */
   static extractFromCookie(cookies: string | undefined, cookieName: string): string | null {
-    if (!cookies) return null;
+    if (!cookies) {
+      return null;
+    }
     for (const cookie of cookies.split(';')) {
       const [name, ...valueParts] = cookie.trim().split('=');
       if (name === cookieName) {

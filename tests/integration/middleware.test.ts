@@ -206,19 +206,25 @@ describe('JWT Middleware - Integration', () => {
 
         // Mock Hono context
         let ssoUser: any = null;
-        let ssoToken: string | null = null;
+        let ssoToken = '';
         let nextCalled = false;
 
         const mockContext = {
           req: {
             header: (name: string) => {
-              if (name === 'authorization') return `Bearer ${tokens.accessToken}`;
+              if (name === 'authorization') {
+                return `Bearer ${tokens.accessToken}`;
+              }
               return undefined;
             },
           },
           set: (key: string, value: unknown) => {
-            if (key === 'ssoUser') ssoUser = value;
-            if (key === 'ssoToken') ssoToken = value as string;
+            if (key === 'ssoUser') {
+              ssoUser = value;
+            }
+            if (key === 'ssoToken') {
+              ssoToken = value as string;
+            }
           },
           json: (obj: { error: string }, status: number) => {
             return new Response(JSON.stringify(obj), { status });
@@ -273,8 +279,8 @@ describe('JWT Middleware - Integration', () => {
         let nextCalled = false;
         let nextError: Error | undefined;
         const mockRes = {
-          status: (code: number) => ({
-            json: (body: { error: string }) => {},
+          status: (_code: number) => ({
+            json: (_body: { error: string }) => {},
           }),
         };
         const mockNext = (error?: Error) => {
@@ -328,8 +334,8 @@ describe('JWT Middleware - Integration', () => {
 
         let replySent = false;
         const mockReply = {
-          code: (statusCode: number) => ({
-            send: (payload: { error: string }) => {
+          code: (_statusCode: number) => ({
+            send: (_payload: { error: string }) => {
               replySent = true;
             },
           }),

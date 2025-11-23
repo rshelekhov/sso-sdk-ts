@@ -51,15 +51,6 @@ interface DeleteUserByIDResponse {
 }
 
 /**
- * Request for searching users
- */
-interface SearchUsersRequest {
-  query: string;
-  pageSize?: number;
-  pageToken?: string;
-}
-
-/**
  * Response from searchUsers endpoint
  */
 interface SearchUsersResponse {
@@ -109,10 +100,18 @@ export class UserAPI extends BaseAPIClient {
   async updateUser(accessToken: string, updates: UpdateUserRequest): Promise<UpdateUserResponse> {
     const body: Record<string, string> = {};
 
-    if (updates.email) body.email = updates.email;
-    if (updates.name) body.name = updates.name;
-    if (updates.currentPassword) body.current_password = updates.currentPassword;
-    if (updates.updatedPassword) body.updated_password = updates.updatedPassword;
+    if (updates.email) {
+      body.email = updates.email;
+    }
+    if (updates.name) {
+      body.name = updates.name;
+    }
+    if (updates.currentPassword) {
+      body.current_password = updates.currentPassword;
+    }
+    if (updates.updatedPassword) {
+      body.updated_password = updates.updatedPassword;
+    }
 
     const response = await this.patch<UpdateUserResponse>(API_ROUTES.USER.UPDATE, body, {
       Authorization: `Bearer ${accessToken}`,
@@ -166,8 +165,12 @@ export class UserAPI extends BaseAPIClient {
     pageToken?: string
   ): Promise<SearchUsersResponse> {
     const params = new URLSearchParams({ query });
-    if (pageSize) params.set('page_size', pageSize.toString());
-    if (pageToken) params.set('page_token', pageToken);
+    if (pageSize) {
+      params.set('page_size', pageSize.toString());
+    }
+    if (pageToken) {
+      params.set('page_token', pageToken);
+    }
 
     const response = await this.get<SearchUsersResponse>(
       `${API_ROUTES.USER.SEARCH}?${params.toString()}`,
