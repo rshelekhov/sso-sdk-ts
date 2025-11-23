@@ -1,6 +1,6 @@
 {
   "name": "@rshelekhov/sso-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Roman Shelekhov",
   "main": "dist/index.js",
   "module": "dist/index.js",
