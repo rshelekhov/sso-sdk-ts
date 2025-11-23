@@ -4,10 +4,10 @@ A robust, type-safe TypeScript SDK for integrating with the [SSO service](https:
 
 ## Features
 
-*   🔒 **Secure by Default**: Automatic token refresh and secure defaults.
-*   💾 **Storage Agnostic**: In-memory token management with hooks for any storage backend (Session, Redis, DB).
-*   🚀 **Framework Independent**: Works with Express, Fastify, Hono, NestJS, and more.
-*   📦 **Type-Safe**: Full TypeScript support with comprehensive types.
+* **Secure by Default**: Automatic token refresh and secure defaults.
+* **Storage Agnostic**: In-memory token management with hooks for any storage backend (Session, Redis, DB).
+* **Framework Independent**: Works with Express, Fastify, Hono, NestJS, and more.
+* **Type-Safe**: Full TypeScript support with comprehensive types.
 
 ## Installation
 
