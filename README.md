@@ -12,9 +12,9 @@ A robust, type-safe TypeScript SDK for integrating with the [SSO service](https:
 ## Installation
 
 ```bash
-npm install @sso-sdk/client
+npm install @rshelekhov/sso-sdk
 # or
-bun add @sso-sdk/client
+bun add @rshelekhov/sso-sdk
 ```
 
 ## Quick Start
@@ -22,7 +22,7 @@ bun add @sso-sdk/client
 ### 1. Initialize the Client
 
 ```typescript
-import { SSOClient, Platform } from '@sso-sdk/client';
+import { SSOClient, Platform } from '@rshelekhov/sso-sdk';
 
 const ssoClient = new SSOClient({
   baseUrl: 'https://api.sso-service.com',
@@ -84,7 +84,7 @@ try {
 For stateless authentication, the SDK provides JWT middleware that validates tokens using JWKS:
 
 ```typescript
-import { AuthMiddleware } from '@sso-sdk/client';
+import { AuthMiddleware } from '@rshelekhov/sso-sdk';
 
 const authMiddleware = new AuthMiddleware({
   jwksUrl: 'https://api.sso-service.com/v1/auth/.well-known/jwks.json',

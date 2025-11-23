@@ -4,6 +4,11 @@
   "author": "Roman Shelekhov",
   "main": "dist/index.js",
   "module": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "devDependencies": {
     "@biomejs/biome": "2.3.6",
     "@faker-js/faker": "^10.1.0",
