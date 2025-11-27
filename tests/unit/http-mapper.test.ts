@@ -6,11 +6,11 @@ import { describe, expect, test } from 'bun:test';
 import {
   AuthenticationError,
   ConflictError,
+  getUserFriendlyMessage,
+  mapSSOErrorToHttp,
   NotFoundError,
   SSOError,
   ValidationError,
-  getUserFriendlyMessage,
-  mapSSOErrorToHttp,
 } from '../../src/errors';
 
 describe('mapSSOErrorToHttp', () => {
@@ -29,10 +29,7 @@ describe('mapSSOErrorToHttp', () => {
   });
 
   test('should preserve specific error codes from API', () => {
-    const error = new AuthenticationError(
-      'Invalid credentials',
-      'ERROR_CODE_INVALID_CREDENTIALS'
-    );
+    const error = new AuthenticationError('Invalid credentials', 'ERROR_CODE_INVALID_CREDENTIALS');
 
     const result = mapSSOErrorToHttp(error);
 

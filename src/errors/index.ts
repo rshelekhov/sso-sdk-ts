@@ -26,7 +26,11 @@ export class SSOError extends Error {
 export class ValidationError extends SSOError {
   public fields: Record<string, string[]>;
 
-  constructor(message: string, fields: Record<string, string[]>, code: string = 'VALIDATION_ERROR') {
+  constructor(
+    message: string,
+    fields: Record<string, string[]>,
+    code: string = 'VALIDATION_ERROR'
+  ) {
     super(message, code, 400, fields);
     this.name = 'ValidationError';
     this.fields = fields;
