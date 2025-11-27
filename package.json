@@ -1,6 +1,6 @@
 {
   "name": "@rshelekhov/sso-sdk",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": "Roman Shelekhov",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -9,6 +9,16 @@
     "README.md",
     "LICENSE"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./adapters/hono": {
+      "import": "./dist/errors/adapters/hono.js",
+      "types": "./dist/errors/adapters/hono.d.ts"
+    }
+  },
   "devDependencies": {
     "@biomejs/biome": "2.3.6",
     "@faker-js/faker": "^10.1.0",
@@ -25,7 +35,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node && bunx tsc --noEmit false --emitDeclarationOnly",
+    "build": "bun build src/index.ts src/errors/adapters/hono.ts --outdir dist --target node && bunx tsc --noEmit false --emitDeclarationOnly",
     "typecheck": "tsc --noEmit",
     "format": "biome format --write .",
     "format:check": "biome check .",
@@ -43,5 +53,13 @@
     "prepublishOnly": "bun run typecheck && bun run build && bun run test:unit"
   },
   "type": "module",
-  "types": "dist/index.d.ts"
+  "types": "dist/index.d.ts",
+  "peerDependencies": {
+    "hono": "^4.10.7"
+  },
+  "peerDependenciesMeta": {
+    "hono": {
+      "optional": true
+    }
+  }
 }
