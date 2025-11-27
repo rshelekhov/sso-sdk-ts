@@ -26,8 +26,8 @@ export class SSOError extends Error {
 export class ValidationError extends SSOError {
   public fields: Record<string, string[]>;
 
-  constructor(message: string, fields: Record<string, string[]>) {
-    super(message, 'VALIDATION_ERROR', 400, fields);
+  constructor(message: string, fields: Record<string, string[]>, code: string = 'VALIDATION_ERROR') {
+    super(message, code, 400, fields);
     this.name = 'ValidationError';
     this.fields = fields;
     Object.setPrototypeOf(this, ValidationError.prototype);
@@ -54,8 +54,8 @@ export class ValidationError extends SSOError {
  * Thrown when credentials are invalid or token is expired
  */
 export class AuthenticationError extends SSOError {
-  constructor(message: string, details?: unknown) {
-    super(message, 'AUTHENTICATION_ERROR', 401, details);
+  constructor(message: string, code: string = 'AUTHENTICATION_ERROR', details?: unknown) {
+    super(message, code, 401, details);
     this.name = 'AuthenticationError';
     Object.setPrototypeOf(this, AuthenticationError.prototype);
   }
@@ -66,8 +66,8 @@ export class AuthenticationError extends SSOError {
  * Thrown when a resource doesn't exist
  */
 export class NotFoundError extends SSOError {
-  constructor(message: string, details?: unknown) {
-    super(message, 'NOT_FOUND', 404, details);
+  constructor(message: string, code: string = 'NOT_FOUND', details?: unknown) {
+    super(message, code, 404, details);
     this.name = 'NotFoundError';
     Object.setPrototypeOf(this, NotFoundError.prototype);
   }
@@ -78,8 +78,8 @@ export class NotFoundError extends SSOError {
  * Thrown when a resource already exists (e.g., email already registered)
  */
 export class ConflictError extends SSOError {
-  constructor(message: string, details?: unknown) {
-    super(message, 'CONFLICT', 409, details);
+  constructor(message: string, code: string = 'CONFLICT', details?: unknown) {
+    super(message, code, 409, details);
     this.name = 'ConflictError';
     Object.setPrototypeOf(this, ConflictError.prototype);
   }
@@ -119,23 +119,25 @@ export function parseAPIError(statusCode: number, errorBody: APIErrorResponse): 
 
   switch (code) {
     case API_ERROR_CODES.VALIDATION_ERROR:
-      return new ValidationError(message, safeDetails);
+      return new ValidationError(message, safeDetails, code);
 
     case API_ERROR_CODES.INVALID_CREDENTIALS:
     case API_ERROR_CODES.SESSION_EXPIRED:
     case API_ERROR_CODES.SESSION_NOT_FOUND:
-      return new AuthenticationError(message, safeDetails);
+      return new AuthenticationError(message, code, safeDetails);
 
     case API_ERROR_CODES.USER_NOT_FOUND:
     case API_ERROR_CODES.VERIFICATION_TOKEN_NOT_FOUND:
-      return new NotFoundError(message, safeDetails);
+      return new NotFoundError(message, code, safeDetails);
 
     case API_ERROR_CODES.USER_ALREADY_EXISTS:
     case API_ERROR_CODES.EMAIL_ALREADY_TAKEN:
     case API_ERROR_CODES.CLIENT_ALREADY_EXISTS:
-      return new ConflictError(message, safeDetails);
+      return new ConflictError(message, code, safeDetails);
 
     default:
       return new SSOError(message, code, statusCode, safeDetails);
   }
 }
+
+export * from './http-mapper.js';
