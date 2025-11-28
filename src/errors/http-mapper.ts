@@ -5,6 +5,7 @@ import {
   type SSOError,
   ValidationError,
 } from './index.js';
+import { API_ERROR_CODES } from '../types/index.js';
 
 /**
  * Valid HTTP error status codes
@@ -128,29 +129,62 @@ function isValidStatusCode(code: number | undefined): code is HttpErrorStatusCod
 
 /**
  * User-friendly error messages
- * Maps technical error codes to human-readable messages
+ * Maps numeric error codes to human-readable messages
  */
-export const USER_FRIENDLY_MESSAGES: Record<string, string> = {
-  ERROR_CODE_INVALID_CREDENTIALS: 'Invalid email or password',
-  ERROR_CODE_USER_ALREADY_EXISTS: 'An account with this email already exists',
-  ERROR_CODE_EMAIL_ALREADY_TAKEN: 'This email is already registered',
-  ERROR_CODE_USER_NOT_FOUND: 'User not found',
-  ERROR_CODE_SESSION_EXPIRED: 'Your session has expired. Please login again',
-  ERROR_CODE_SESSION_NOT_FOUND: 'Session not found',
-  ERROR_CODE_VERIFICATION_TOKEN_NOT_FOUND: 'Verification link is invalid or expired',
+export const USER_FRIENDLY_MESSAGES: Record<number, string> = {
+  // Authentication Errors (1000-1099)
+  [API_ERROR_CODES.INVALID_CREDENTIALS]: 'Invalid email or password',
+  [API_ERROR_CODES.USER_ALREADY_EXISTS]: 'An account with this email already exists',
+  [API_ERROR_CODES.USER_NOT_FOUND]: 'User not found',
+  [API_ERROR_CODES.SESSION_EXPIRED]: 'Your session has expired. Please login again',
+  [API_ERROR_CODES.SESSION_NOT_FOUND]: 'Session not found',
+  [API_ERROR_CODES.EMAIL_ALREADY_TAKEN]: 'This email is already registered',
+  [API_ERROR_CODES.USER_DEVICE_NOT_FOUND]: 'Device not found',
+
+  // Verification Errors (1100-1199)
+  [API_ERROR_CODES.TOKEN_EXPIRED]: 'Token has expired',
+  [API_ERROR_CODES.VERIFICATION_TOKEN_NOT_FOUND]: 'Verification link is invalid or expired',
+  [API_ERROR_CODES.TOKEN_EXPIRED_EMAIL_RESENT]:
+    'Token expired. A new verification email has been sent',
+
+  // Validation Errors (1200-1299)
+  [API_ERROR_CODES.PASSWORDS_DO_NOT_MATCH]: 'Passwords do not match',
+  [API_ERROR_CODES.NO_EMAIL_CHANGES_DETECTED]: 'No email changes detected',
+  [API_ERROR_CODES.NO_PASSWORD_CHANGES_DETECTED]: 'No password changes detected',
+  [API_ERROR_CODES.NO_NAME_CHANGES_DETECTED]: 'No name changes detected',
+  [API_ERROR_CODES.CLIENT_ID_NOT_ALLOWED]: 'Client ID not allowed',
+  [API_ERROR_CODES.VALIDATION_ERROR]: 'Validation error',
+  [API_ERROR_CODES.CURRENT_PASSWORD_REQUIRED]: 'Current password is required',
+
+  // Client Management Errors (1300-1399)
+  [API_ERROR_CODES.CLIENT_NOT_FOUND]: 'Client not found',
+  [API_ERROR_CODES.CLIENT_ALREADY_EXISTS]: 'Client already exists',
+  [API_ERROR_CODES.CLIENT_NAME_EMPTY]: 'Client name cannot be empty',
+
+  // Internal Service Errors (1500-1599)
+  [API_ERROR_CODES.FAILED_TO_SEND_VERIFICATION_EMAIL]:
+    'Failed to send verification email. Please try again',
+  [API_ERROR_CODES.FAILED_TO_SEND_RESET_PASSWORD_EMAIL]:
+    'Failed to send password reset email. Please try again',
 };
 
 /**
  * Get user-friendly error message
  * Falls back to provided message if no mapping exists
  *
- * @param code - Error code from SSO
+ * @param code - Numeric or string error code from SSO
  * @param defaultMessage - Fallback message
  * @returns User-friendly error message
  */
-export function getUserFriendlyMessage(code: string | undefined, defaultMessage: string): string {
-  if (code && USER_FRIENDLY_MESSAGES[code]) {
-    return USER_FRIENDLY_MESSAGES[code];
+export function getUserFriendlyMessage(
+  code: string | number | undefined,
+  defaultMessage: string
+): string {
+  if (code !== undefined) {
+    const numericCode = typeof code === 'string' ? Number.parseInt(code, 10) : code;
+    if (!Number.isNaN(numericCode) && USER_FRIENDLY_MESSAGES[numericCode]) {
+      return USER_FRIENDLY_MESSAGES[numericCode];
+    }
   }
   return defaultMessage;
 }

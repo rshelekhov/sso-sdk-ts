@@ -63,18 +63,41 @@ export interface SSOClientConfig {
 }
 
 /**
- * Standard error codes returned by the SSO API
+ * Numeric error codes returned by the SSO API
+ * These match the ErrorCode enum from the backend protobuf definitions
  */
 export const API_ERROR_CODES = {
-  VALIDATION_ERROR: 'ERROR_CODE_VALIDATION_ERROR',
-  INVALID_CREDENTIALS: 'ERROR_CODE_INVALID_CREDENTIALS',
-  SESSION_EXPIRED: 'ERROR_CODE_SESSION_EXPIRED',
-  SESSION_NOT_FOUND: 'ERROR_CODE_SESSION_NOT_FOUND',
-  USER_NOT_FOUND: 'ERROR_CODE_USER_NOT_FOUND',
-  VERIFICATION_TOKEN_NOT_FOUND: 'ERROR_CODE_VERIFICATION_TOKEN_NOT_FOUND',
-  USER_ALREADY_EXISTS: 'ERROR_CODE_USER_ALREADY_EXISTS',
-  EMAIL_ALREADY_TAKEN: 'ERROR_CODE_EMAIL_ALREADY_TAKEN',
-  CLIENT_ALREADY_EXISTS: 'ERROR_CODE_CLIENT_ALREADY_EXISTS',
+  // Authentication Errors (1000-1099)
+  INVALID_CREDENTIALS: 1000,
+  USER_ALREADY_EXISTS: 1001,
+  USER_NOT_FOUND: 1002,
+  SESSION_EXPIRED: 1003,
+  SESSION_NOT_FOUND: 1004,
+  EMAIL_ALREADY_TAKEN: 1005,
+  USER_DEVICE_NOT_FOUND: 1006,
+
+  // Verification Errors (1100-1199)
+  TOKEN_EXPIRED: 1100,
+  VERIFICATION_TOKEN_NOT_FOUND: 1101,
+  TOKEN_EXPIRED_EMAIL_RESENT: 1102,
+
+  // Validation Errors (1200-1299)
+  PASSWORDS_DO_NOT_MATCH: 1200,
+  NO_EMAIL_CHANGES_DETECTED: 1201,
+  NO_PASSWORD_CHANGES_DETECTED: 1202,
+  NO_NAME_CHANGES_DETECTED: 1203,
+  CLIENT_ID_NOT_ALLOWED: 1204,
+  VALIDATION_ERROR: 1205,
+  CURRENT_PASSWORD_REQUIRED: 1206,
+
+  // Client Management Errors (1300-1399)
+  CLIENT_NOT_FOUND: 1300,
+  CLIENT_ALREADY_EXISTS: 1301,
+  CLIENT_NAME_EMPTY: 1302,
+
+  // Internal Service Errors (1500-1599)
+  FAILED_TO_SEND_VERIFICATION_EMAIL: 1500,
+  FAILED_TO_SEND_RESET_PASSWORD_EMAIL: 1501,
 } as const;
 
 /**
@@ -86,7 +109,7 @@ export type APIErrorCode = (typeof API_ERROR_CODES)[keyof typeof API_ERROR_CODES
  * API error response structure
  */
 export interface APIErrorResponse {
-  code: APIErrorCode; // Error code like "ERROR_CODE_INVALID_CREDENTIALS"
+  code: number; // Numeric error code (1000-1599)
   message: string; // Human-readable error message
   details?: Record<string, string[]>; // Field-specific errors for validation
 }

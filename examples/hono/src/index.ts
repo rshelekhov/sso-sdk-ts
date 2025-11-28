@@ -13,7 +13,13 @@ import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 
 dotenv.config();
 
-const app = new Hono();
+// Extend Hono's context type to include custom variables
+type Variables = {
+  sessionId: string;
+  ssoUser: JWTClaims;
+};
+
+const app = new Hono<{ Variables: Variables }>();
 const port = Number(process.env.PORT) || 3000;
 
 // Initialize SSO Client
@@ -42,7 +48,7 @@ app.use('*', async (c, next) => {
   const sessionId = getCookie(c, 'session_id');
   let session = sessionId ? sessionStore.get(sessionId) : undefined;
 
-  if (session) {
+  if (session && sessionId) {
     c.set('sessionId', sessionId);
   } else {
     session = {};
@@ -56,6 +62,7 @@ app.use('*', async (c, next) => {
     });
     c.set('sessionId', newSessionId);
   }
+
 
   await next();
 });

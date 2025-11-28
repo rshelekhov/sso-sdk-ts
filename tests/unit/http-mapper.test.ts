@@ -12,6 +12,7 @@ import {
   SSOError,
   ValidationError,
 } from '../../src/errors';
+import { API_ERROR_CODES } from '../../src/types';
 
 describe('mapSSOErrorToHttp', () => {
   test('should preserve ValidationError fields in details', () => {
@@ -29,13 +30,16 @@ describe('mapSSOErrorToHttp', () => {
   });
 
   test('should preserve specific error codes from API', () => {
-    const error = new AuthenticationError('Invalid credentials', 'ERROR_CODE_INVALID_CREDENTIALS');
+    const error = new AuthenticationError(
+      'Invalid credentials',
+      String(API_ERROR_CODES.INVALID_CREDENTIALS)
+    );
 
     const result = mapSSOErrorToHttp(error);
 
     // Critical: specific code should be preserved, not replaced with 'AUTHENTICATION_ERROR'
     expect(result.statusCode).toBe(401);
-    expect(result.code).toBe('ERROR_CODE_INVALID_CREDENTIALS');
+    expect(result.code).toBe(String(API_ERROR_CODES.INVALID_CREDENTIALS));
     expect(result.message).toBe('Invalid email or password');
   });
 
@@ -82,31 +86,31 @@ describe('getUserFriendlyMessage', () => {
   test('should map all documented error codes correctly', () => {
     const testCases = [
       {
-        code: 'ERROR_CODE_INVALID_CREDENTIALS',
+        code: API_ERROR_CODES.INVALID_CREDENTIALS,
         expected: 'Invalid email or password',
       },
       {
-        code: 'ERROR_CODE_USER_ALREADY_EXISTS',
+        code: API_ERROR_CODES.USER_ALREADY_EXISTS,
         expected: 'An account with this email already exists',
       },
       {
-        code: 'ERROR_CODE_EMAIL_ALREADY_TAKEN',
+        code: API_ERROR_CODES.EMAIL_ALREADY_TAKEN,
         expected: 'This email is already registered',
       },
       {
-        code: 'ERROR_CODE_USER_NOT_FOUND',
+        code: API_ERROR_CODES.USER_NOT_FOUND,
         expected: 'User not found',
       },
       {
-        code: 'ERROR_CODE_SESSION_EXPIRED',
+        code: API_ERROR_CODES.SESSION_EXPIRED,
         expected: 'Your session has expired. Please login again',
       },
       {
-        code: 'ERROR_CODE_SESSION_NOT_FOUND',
+        code: API_ERROR_CODES.SESSION_NOT_FOUND,
         expected: 'Session not found',
       },
       {
-        code: 'ERROR_CODE_VERIFICATION_TOKEN_NOT_FOUND',
+        code: API_ERROR_CODES.VERIFICATION_TOKEN_NOT_FOUND,
         expected: 'Verification link is invalid or expired',
       },
     ];
@@ -117,9 +121,18 @@ describe('getUserFriendlyMessage', () => {
     }
   });
 
+  test('should handle string codes by parsing them', () => {
+    expect(getUserFriendlyMessage(String(API_ERROR_CODES.INVALID_CREDENTIALS), 'Default')).toBe(
+      'Invalid email or password'
+    );
+    expect(getUserFriendlyMessage(String(API_ERROR_CODES.USER_ALREADY_EXISTS), 'Default')).toBe(
+      'An account with this email already exists'
+    );
+  });
+
   test('should return default message for unknown codes', () => {
-    expect(getUserFriendlyMessage('ERROR_CODE_UNKNOWN', 'Default')).toBe('Default');
+    expect(getUserFriendlyMessage(9999, 'Default')).toBe('Default');
     expect(getUserFriendlyMessage(undefined, 'Default')).toBe('Default');
-    expect(getUserFriendlyMessage('', 'Default')).toBe('Default');
+    expect(getUserFriendlyMessage('invalid', 'Default')).toBe('Default');
   });
 });
